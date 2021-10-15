@@ -46,14 +46,14 @@ defmodule Mix.Tasks.Phx.Gen.Theme do
       EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/login.html.eex", project: project)
     )
 
-    # login layout with form inside
-    material_login_ex =
-      File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/login.html.eex"
+    # # login layout with form inside
+    # material_login_ex =
+    #   File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/login.html.eex"
 
-    Mix.Generator.create_file(
-      material_login_ex,
-      EEx.eval_file("#{app_dir}/priv/templates/layout/material_login.html.eex", project: project)
-    )
+    # Mix.Generator.create_file(
+    #   material_login_ex,
+    #   EEx.eval_file("#{app_dir}/priv/templates/layout/material_login.html.eex", project: project)
+    # )
   end
 
   defp run_args() do
