@@ -53,25 +53,30 @@ defmodule Mix.Tasks.Phx.Gen.Theme do
     material_login_ex =
       File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/login.html.eex"
 
-    Mix.Generator.create_file(
-      material_login_ex,
-      EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/layout_login.html.eex",
-        project: project
-      )
-    )
+    # Mix.Generator.create_file(
+    #   material_login_ex,
+    #   EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/layout_login.html.eex",
+    #     project: project
+    #   )
+    # )
+
+    File.cp!("#{app_dir}/priv/templates/phx.gen.theme/layout_login.html.eex", material_login_ex)
 
     bootstrap_app_ex =
       File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/app.html.eex"
 
-    Mix.Generator.create_file(
-      bootstrap_app_ex,
-      EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/layout_app.html.eex",
-        project: project
-      )
+    File.cp!("#{app_dir}/priv/templates/phx.gen.theme/layout_app.html.eex", bootstrap_app_ex)
+
+    bootstrap_header_ex =
+      File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/header.html.eex"
+
+    File.cp!(
+      "#{app_dir}/priv/templates/phx.gen.theme/layout_header.html.eex",
+      bootstrap_header_ex
     )
 
     # copy all the static files over...
-    File.cp_r!("#{app_dir}/priv", File.cwd!() <> "/priv")
+    File.cp_r!("#{app_dir}/priv/", File.cwd!() <> "/priv/static/assets/")
   end
 
   defp run_args() do
