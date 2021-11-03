@@ -5,7 +5,7 @@ defmodule <%=  project.name %>Web.ApiController do
     final =
       case params["scope"] do
         "gen_inputs" ->
-          Utility.test_module(params["module"])
+          BluePotion.test_module(params["module"])
 
         _ ->
           %{status: "received"}

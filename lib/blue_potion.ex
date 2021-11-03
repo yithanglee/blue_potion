@@ -64,7 +64,7 @@ defmodule BluePotion do
         |> Enum.reject(fn x -> elem(x, 1) == nil end)
 
     additional_search_params =
-      params |> Map.drop(["_", "columns", "draw", "foo", "length", "order", "search", "start"])
+      params |> Map.drop(["_", "rowFn","pageLength" , "columns", "draw", "foo", "length", "order", "search", "start"])
 
     asp = additional_search_params |> Map.keys()
 
@@ -117,8 +117,15 @@ defmodule BluePotion do
       end
 
     data2 =
+      if preloads != [] do
+      Repo.all(q2)
+      |> Repo.preload(preloads)
+      |> Enum.map(fn x -> BluePotion.s_to_map(x) end)
+        else 
       Repo.all(q2)
       |> Enum.map(fn x -> BluePotion.s_to_map(x) end)
+      end
+
 
     %{
       data: data2,
@@ -129,7 +136,9 @@ defmodule BluePotion do
 
     """
 
-    {result, _values} = Code.eval_string(dynamic_code, params: params, module: module)
+    {result, _values} =
+      Code.eval_string(dynamic_code, params: params, module: module, preloads: preloads)
+
     result
   end
 
@@ -221,6 +230,7 @@ defmodule BluePotion do
       Map.values(params)
       |> Enum.with_index()
       |> Enum.filter(fn x -> is_map(elem(x, 0)) end)
+      |> Enum.filter(fn x -> :__struct__ in Map.keys(elem(x, 0)) end)
       |> Enum.filter(fn x -> elem(x, 0).__struct__ == Plug.Upload end)
 
     if check_upload != [] do
@@ -326,6 +336,7 @@ defmodule BluePotion do
     exclusion = additional_exclusion ++ (test_module(module) |> Map.keys())
 
     a = Map.from_struct(struct)
+
     d = Enum.filter(a, fn x -> Decimal.is_decimal(elem(x, 1)) end)
     c = Enum.filter(a, fn x -> is_number(elem(x, 1)) end)
     b = Enum.filter(a, fn x -> is_binary(elem(x, 1)) end)
@@ -425,7 +436,23 @@ defmodule BluePotion do
         {elem(item, 0), final}
       end
 
-    [b ++ c ++ d ++ e ++ f ++ g ++ h ++ j ++ k] |> List.flatten() |> Enum.into(%{})
+    is_struct = fn data ->
+      :__meta__ in (data |> Map.keys())
+    end
+
+    m =
+      a
+      |> Enum.filter(&is_map(elem(&1, 1)))
+      |> Enum.filter(&is_struct.(elem(&1, 1)))
+
+    n =
+      for item <- m do
+        res = {elem(item, 0), Map.delete(Map.from_struct(elem(item, 1)), :__meta__)}
+
+        res
+      end
+
+    [b ++ c ++ d ++ e ++ f ++ g ++ h ++ j ++ k ++ n] |> List.flatten() |> Enum.into(%{})
   end
 
   def test_module(module) do

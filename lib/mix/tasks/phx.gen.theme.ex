@@ -66,13 +66,6 @@ defmodule Mix.Tasks.Phx.Gen.Theme do
 
     material_login(app_dir, project)
 
-    utility_ex = File.cwd!() <> "/lib//utility.ex"
-
-    Mix.Generator.create_file(
-      utility_ex,
-      EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/utility.ex", project: project)
-    )
-
     Mix.Generator.create_file(
       File.cwd!() <> "/lib//#{project.alias_name}_web/controllers/api_controller.ex",
       EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/api_controller.ex", project: project)

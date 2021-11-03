@@ -13,7 +13,7 @@ defmodule <%=  project.name %>Web.LoginController do
       user = List.first(users)
 
       conn
-      |> put_session(:current_user, Utility.s_to_map(user))
+      |> put_session(:current_user, BluePotion.s_to_map(user))
       |> put_flash(:info, "Welcome!")
       |> redirect(to: "/admin")
     else
