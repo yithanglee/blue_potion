@@ -1,7 +1,7 @@
- <div class="row">
-          <div class="col-lg-4 col-md-6 col-sm-8 ml-auto mr-auto">
+ <div class=" pt-4">
+          <div class=" text-center">
             <form class="form" method="post" action="/admin/authenticate">
-              <input type="hidden" name="_csrf_token" value="<%%= Phoenix.Controller.get_csrf_token %>">
+              <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
               <div class="card card-login card-hidden">
                 <div class="card-header card-header-rose text-center">
                   <h4 class="card-title">Login</h4>
@@ -13,7 +13,7 @@
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text">
-                          <i class="material-icons">face</i>
+                          <i class="fa fa-user"></i>
                         </span>
                       </div>
                       <input name="username" type="text" class="form-control" placeholder="Username...">
@@ -23,7 +23,7 @@
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text">
-                          <i class="material-icons">email</i>
+                          <i class="fa fa-envelope"></i>
                         </span>
                       </div>
                       <input name="email" type="email" class="form-control" placeholder="Email...">
@@ -33,7 +33,7 @@
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text">
-                          <i class="material-icons">lock_outline</i>
+                          <i class="fa fa-key"></i>
                         </span>
                       </div>
                       <input name="password" type="password" class="form-control" placeholder="Password...">

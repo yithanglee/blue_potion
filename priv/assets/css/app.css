@@ -1,0 +1,17 @@
+/* This file is for your main application css. */
+/*@import "./phoenix.css";*/
+
+div.dataTables_wrapper div.dataTables_length select {
+	width: 120px;
+	min-width: 55px;
+	display: inline-block;
+}
+.text-sm {
+font-size: 16px;
+}
+.text-lg {
+font-size: 24px;
+}
+.text-xl {
+font-size: 32px;
+}

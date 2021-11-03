@@ -46,14 +46,32 @@ defmodule Mix.Tasks.Phx.Gen.Theme do
       EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/login.html.eex", project: project)
     )
 
-    # # login layout with form inside
-    # material_login_ex =
-    #   File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/login.html.eex"
+    # bring over all the needed files with bundled js.. ?
+    # firstly build the admin backend...  
 
-    # Mix.Generator.create_file(
-    #   material_login_ex,
-    #   EEx.eval_file("#{app_dir}/priv/templates/layout/material_login.html.eex", project: project)
-    # )
+    # login layout with form inside
+    material_login_ex =
+      File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/login.html.eex"
+
+    Mix.Generator.create_file(
+      material_login_ex,
+      EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/layout_login.html.eex",
+        project: project
+      )
+    )
+
+    bootstrap_app_ex =
+      File.cwd!() <> "/lib/#{project.alias_name}_web/templates/layout" <> "/app.html.eex"
+
+    Mix.Generator.create_file(
+      bootstrap_app_ex,
+      EEx.eval_file("#{app_dir}/priv/templates/phx.gen.theme/layout_app.html.eex",
+        project: project
+      )
+    )
+
+    # copy all the static files over...
+    File.cp_r!("#{app_dir}/priv", File.cwd!() <> "/priv")
   end
 
   defp run_args() do
