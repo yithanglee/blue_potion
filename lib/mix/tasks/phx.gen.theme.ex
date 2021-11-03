@@ -76,7 +76,7 @@ defmodule Mix.Tasks.Phx.Gen.Theme do
     )
 
     # copy all the static files over...
-    File.cp_r!("#{app_dir}/priv/", File.cwd!() <> "/priv/static/assets/")
+    File.cp_r!("#{app_dir}/priv/assets", File.cwd!() <> "/priv/static/")
   end
 
   defp run_args() do
