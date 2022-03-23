@@ -446,10 +446,14 @@ defmodule BluePotion do
       |> Enum.filter(&is_struct.(elem(&1, 1)))
 
     n =
-      for item <- m do
-        res = {elem(item, 0), Map.delete(Map.from_struct(elem(item, 1)), :__meta__)}
+      for {key, sstr} <- m do
+        sstr = Map.from_struct(sstr)
+        exclusion = sstr.__meta__.schema.__schema__(:associations)
 
-        res
+        map = Map.delete(sstr, :__meta__)
+        fi = Enum.reduce(exclusion, map, fn x, acc -> Map.delete(acc, x) end)
+
+        {key, fi}
       end
 
     [b ++ c ++ d ++ e ++ f ++ g ++ h ++ j ++ k ++ n] |> List.flatten() |> Enum.into(%{})

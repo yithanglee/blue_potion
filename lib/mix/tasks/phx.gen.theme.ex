@@ -114,7 +114,7 @@ defmodule Mix.Tasks.Phx.Gen.Theme do
     ~s(\r\n\tscope \"/\", #{project.name}Web do\r\n\t  pipe_through \:browser\r\n\t  get\(\"/\", LandingPageController, :index\)\r\n\tend\r\n\r\n)
     |> IO.puts()
 
-    ~s(\r\n\tscope \"/api\", #{project.name}Web do\r\n\t  pipe_through \:api\r\n\t  get\(\"/webhook\", ApiController, :webhook\)\r\n\t  post\(\"/webhook\", ApiController, :webhook_post\)\r\n\t  delete\(\"/webhook\", ApiController, :webhook_delete\)\r\n\tend\r\n\r\n)
+    ~s(\r\n\tscope \"/api\", #{project.name}Web do\r\n\t  pipe_through \:api\r\n\t  get\(\"/webhook\", ApiController, :webhook\)\r\n\t  post\(\"/webhook\", ApiController, :webhook_post\)\r\n\t  delete\(\"/webhook\", ApiController, :webhook_delete\)\r\n\t get\(\"/:model\", ApiController, :datatable\)\r\n\t  post\(\"/:model\", ApiController, :form_submission\)\r\nend\r\n\r\n)
     |> IO.puts()
 
     []
