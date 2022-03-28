@@ -106,7 +106,8 @@ defmodule BluePotion do
         a in module,
         limit: ^limit,
         offset: ^offset,
-        order_by: ^order_by
+        order_by: ^order_by,
+        preload: ^preloads
       )
 
     q2 =
@@ -117,15 +118,8 @@ defmodule BluePotion do
       end
 
     data2 =
-      if preloads != [] do
-      Repo.all(q2)
-      |> Repo.preload(preloads)
-      |> Enum.map(fn x -> BluePotion.s_to_map(x) end)
-        else 
       Repo.all(q2)
       |> Enum.map(fn x -> BluePotion.s_to_map(x) end)
-      end
-
 
     %{
       data: data2,
@@ -315,6 +309,35 @@ defmodule BluePotion do
         third = sanitized |> Enum.reverse() |> Enum.take(3) |> Enum.join("")
 
         if third == "sei" do
+          final = sanitized |> Enum.reverse() |> Enum.take(3) |> Enum.join("")
+          final == "sei"
+        else
+          true
+        end
+      else
+        total = Enum.count(sanitized)
+        Enum.take(sanitized, total - 1) |> Enum.join()
+
+        # String.replace(string, first, "")
+        true
+      end
+    else
+      false
+    end
+  end
+
+  def remove_s(string \\ "stock_groups") do
+    sanitized = String.split(string, "") |> Enum.reject(&(&1 == ""))
+
+    first = sanitized |> Enum.reverse() |> Enum.take(1) |> List.last()
+
+    if first == "s" do
+      second = sanitized |> Enum.reverse() |> Enum.take(2) |> Enum.join("")
+
+      if second == "se" do
+        third = sanitized |> Enum.reverse() |> Enum.take(3) |> Enum.join("")
+
+        if third == "sei" do
           String.replace(string, third, "")
         else
           # String.replace(string, second, "")
@@ -428,9 +451,36 @@ defmodule BluePotion do
 
         final =
           for list_i <- list do
-            Map.from_struct(list_i)
-            |> Map.delete(:__meta__)
-            |> Map.delete(String.to_atom(has_s(struct.__meta__.source)))
+            remove_inner_assoc = fn map, assoc ->
+              assoc_data = map |> Map.get(assoc)
+
+              if Ecto.assoc_loaded?(assoc_data) do
+                map2 =
+                  Map.from_struct(assoc_data)
+                  |> Map.delete(:__meta__)
+
+                exclusion = assoc_data.__meta__.schema.__schema__(:associations)
+
+                fi = Enum.reduce(exclusion, map2, fn x, acc -> Map.delete(acc, x) end)
+
+                fi
+
+                map |> Map.put(assoc, fi)
+              else
+                map |> Map.delete(assoc)
+              end
+            end
+
+            map =
+              Map.from_struct(list_i)
+              |> Map.delete(:__meta__)
+              |> Map.delete(String.to_atom(remove_s(struct.__meta__.source)))
+
+            assocs = list_i.__meta__.schema.__schema__(:associations)
+
+            fi = Enum.reduce(assocs, map, fn x, acc -> remove_inner_assoc.(acc, x) end)
+
+            fi
           end
 
         {elem(item, 0), final}
