@@ -34,7 +34,7 @@ defmodule BluePotion do
 
 
   """
-  def post_process_datatable(params, module, preloads \\ []) do
+  def post_process_datatable(params, module, additional_search_queries, preloads \\ []) do
     config = Application.get_env(:blue_potion, :repo)
 
     repo =
@@ -64,7 +64,7 @@ defmodule BluePotion do
         |> Enum.reject(fn x -> elem(x, 1) == nil end)
 
     additional_search_params =
-      params |> Map.drop(["_", "rowFn","pageLength" , "columns", "draw", "foo", "length", "order", "search", "start"])
+      params |> Map.drop(["_", "rowFn","pageLength", "additional_search_queries" , "columns", "draw", "foo", "length", "order", "search", "start"])
 
     asp = additional_search_params |> Map.keys()
 
@@ -98,6 +98,7 @@ defmodule BluePotion do
       else
         q1
       end
+      #{additional_search_queries}
 
     data = Repo.all(q1)
 
@@ -116,6 +117,7 @@ defmodule BluePotion do
       else
         q2
       end
+      #{additional_search_queries}
 
     data2 =
       Repo.all(q2)
@@ -455,17 +457,21 @@ defmodule BluePotion do
               assoc_data = map |> Map.get(assoc)
 
               if Ecto.assoc_loaded?(assoc_data) do
-                map2 =
-                  Map.from_struct(assoc_data)
-                  |> Map.delete(:__meta__)
+                if assoc_data != nil do
+                  map2 =
+                    Map.from_struct(assoc_data)
+                    |> Map.delete(:__meta__)
 
-                exclusion = assoc_data.__meta__.schema.__schema__(:associations)
+                  exclusion = assoc_data.__meta__.schema.__schema__(:associations)
 
-                fi = Enum.reduce(exclusion, map2, fn x, acc -> Map.delete(acc, x) end)
+                  fi = Enum.reduce(exclusion, map2, fn x, acc -> Map.delete(acc, x) end)
 
-                fi
+                  fi
 
-                map |> Map.put(assoc, fi)
+                  map |> Map.put(assoc, fi)
+                else
+                  map
+                end
               else
                 map |> Map.delete(assoc)
               end
