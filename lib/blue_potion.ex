@@ -34,7 +34,13 @@ defmodule BluePotion do
 
 
   """
-  def post_process_datatable(params, module, additional_search_queries, preloads \\ []) do
+  def post_process_datatable(
+        params,
+        module,
+        additional_join_statements,
+        additional_search_queries,
+        preloads \\ []
+      ) do
     config = Application.get_env(:blue_potion, :repo)
 
     repo =
@@ -64,7 +70,7 @@ defmodule BluePotion do
         |> Enum.reject(fn x -> elem(x, 1) == nil end)
 
     additional_search_params =
-      params |> Map.drop(["_", "rowFn","pageLength", "additional_search_queries" , "columns", "draw", "foo", "length", "order", "search", "start"])
+      params |> Map.drop(["_", "rowFn","pageLength", "additional_join_statements","additional_search_queries" , "columns", "draw", "foo", "length", "order", "search", "start"])
 
     asp = additional_search_params |> Map.keys()
 
@@ -91,6 +97,7 @@ defmodule BluePotion do
     order_by = dirs
 
     q1 = from(a in module)
+        #{additional_join_statements}
 
     q1 =
       if search_queries != [] do
@@ -110,6 +117,7 @@ defmodule BluePotion do
         order_by: ^order_by,
         preload: ^preloads
       )
+       #{additional_join_statements}
 
     q2 =
       if search_queries != [] do
