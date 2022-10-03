@@ -168,6 +168,51 @@ defmodule BluePotion do
     |> Enum.into(%{})
   end
 
+  def string_to_atom(body) do
+    keys = Map.keys(body)
+
+    for key <- keys do
+      cond do
+        is_time(body[key]) |> elem(0) == :ok ->
+          {key, body[key]}
+
+        is_map(body[key]) ->
+          content = body[key] |> string_to_atom
+
+          if key |> is_atom do
+            {key, content}
+          else
+            {String.to_atom(key), content}
+          end
+
+        is_list(body[key]) ->
+          content =
+            for map <- body[key] do
+              if is_map(map) do
+                string_to_atom(map)
+              else
+                map
+              end
+            end
+
+          # {String.to_atom(key), content}
+          if key |> is_atom do
+            {key, content}
+          else
+            {String.to_atom(key), content}
+          end
+
+        true ->
+          if key |> is_atom do
+            {key, body[key]}
+          else
+            {String.to_atom(key), body[key]}
+          end
+      end
+    end
+    |> Enum.into(%{})
+  end
+
   def atom_to_string(body, keys) do
     for key <- keys do
       cond do
@@ -361,6 +406,65 @@ defmodule BluePotion do
         # String.replace(string, first, "")
       end
     else
+    end
+  end
+
+  def sanitize_struct(struct) do
+    if struct != nil do
+      map =
+        struct
+        |> Map.from_struct()
+        |> Map.delete(:__meta__)
+
+      fields =
+        if :__meta__ in Map.keys(struct) do
+          struct.__meta__.schema.__schema__(:fields)
+        else
+          Map.keys(struct)
+        end
+
+      field_to_loop =
+        for field <- fields do
+          if struct |> Map.get(field) |> is_list do
+            field
+          end
+        end
+        |> Enum.reject(&(&1 == nil))
+
+      sanitize_reducer = fn ori_map, field ->
+        sanitized_list = ori_map |> Map.get(field) |> Enum.map(&(&1 |> sanitize_struct()))
+
+        ori_map |> Map.put(field, sanitized_list)
+      end
+
+      exclusion =
+        if :__meta__ in Map.keys(struct) do
+          struct.__meta__.schema.__schema__(:associations)
+        else
+          []
+        end
+
+      assocs = exclusion
+
+      inner_sanitize = fn inner_map, assoc ->
+        if Ecto.assoc_loaded?(Map.get(struct, assoc)) do
+          res = sanitize_struct(Map.get(struct, assoc))
+
+          Map.put(inner_map, assoc, res)
+        else
+          # inner_map
+
+          Map.put(inner_map, assoc, nil)
+        end
+      end
+
+      # instead of deleting the assocs... 
+      # post_res = Enum.reduce(exclusion, map, fn x, acc -> Map.delete(acc, x) end)
+      post_res = Enum.reduce(assocs, map, fn x, acc -> inner_sanitize.(acc, x) end)
+
+      Enum.reduce(field_to_loop, post_res, fn x, acc -> sanitize_reducer.(acc, x) end)
+    else
+      nil
     end
   end
 
