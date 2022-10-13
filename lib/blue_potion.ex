@@ -410,7 +410,7 @@ defmodule BluePotion do
   end
 
   def sanitize_struct(struct) do
-    if struct != nil do
+    if struct != nil && is_struct(struct) do
       map =
         struct
         |> Map.from_struct()
@@ -464,7 +464,13 @@ defmodule BluePotion do
 
       Enum.reduce(field_to_loop, post_res, fn x, acc -> sanitize_reducer.(acc, x) end)
     else
-      nil
+      if struct |> is_list do
+        for child_struct <- struct do
+          sanitize_struct(child_struct)
+        end
+      else
+        struct
+      end
     end
   end
 
