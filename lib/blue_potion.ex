@@ -146,6 +146,18 @@ defmodule BluePotion do
     result
   end
 
+  def convert_to_atom(data) do
+    if is_map(data) do
+      items = data |> Map.to_list()
+
+      for {x, y} <- items do
+        {String.to_atom(x), convert_to_atom(y)}
+      end
+    else
+      String.to_atom(data)
+    end
+  end
+
   def string_to_atom(body, keys) do
     for key <- keys do
       cond do
