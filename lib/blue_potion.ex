@@ -129,7 +129,7 @@ defmodule BluePotion do
 
     data2 =
       Repo.all(q2)
-      |> Enum.map(fn x -> BluePotion.s_to_map(x) end)
+      |> Enum.map(fn x -> BluePotion.sanitize_struct(x) end)
 
     %{
       data: data2,
