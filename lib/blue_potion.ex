@@ -78,7 +78,7 @@ defmodule BluePotion do
       for asp_child <- asp do
         {String.to_atom(asp_child), additional_search_params |> Map.get(asp_child)}
       end
-
+    search_queries2 = []
     search_queries = search_queries ++ search_queries2
 
     column_no = params["order"]["0"]["column"]
