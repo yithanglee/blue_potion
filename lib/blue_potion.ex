@@ -39,7 +39,8 @@ defmodule BluePotion do
         module,
         additional_join_statements,
         additional_search_queries,
-        preloads \\ []
+        preloads \\ [],
+        additional_order_statements
       ) do
     config = Application.get_env(:blue_potion, :repo)
 
@@ -70,7 +71,7 @@ defmodule BluePotion do
         |> Enum.reject(fn x -> elem(x, 1) == nil end)
 
     additional_search_params =
-      params |> Map.drop(["_", "rowFn","pageLength", "additional_join_statements","additional_search_queries" , "columns", "draw", "foo", "length", "order", "search", "start"])
+      params |> Map.drop(["_", "rowFn","pageLength", "additional_order_statements", "additional_join_statements","additional_search_queries" , "columns", "draw", "foo", "length", "order", "search", "start"])
 
     asp = additional_search_params |> Map.keys()
 
@@ -106,10 +107,19 @@ defmodule BluePotion do
         q1
       end
       #{additional_search_queries}
-
-    data = Repo.all(q1)
+    |> IO.inspect
+    data = Repo.all(q1) 
 
     q2 =
+      if additional_order_statements != "" do
+      from(
+        a in module,
+        limit: ^limit,
+        offset: ^offset,
+
+        preload: ^preloads
+      )
+    else 
       from(
         a in module,
         limit: ^limit,
@@ -117,6 +127,7 @@ defmodule BluePotion do
         order_by: ^order_by,
         preload: ^preloads
       )
+    end 
        #{additional_join_statements}
 
     q2 =
@@ -126,6 +137,15 @@ defmodule BluePotion do
         q2
       end
       #{additional_search_queries}
+
+
+    q2 = 
+      if additional_order_statements != "" do
+        q2 
+        #{additional_order_statements}
+      else 
+        q2 
+      end
 
     data2 =
       Repo.all(q2)
@@ -141,7 +161,12 @@ defmodule BluePotion do
     """
 
     {result, _values} =
-      Code.eval_string(dynamic_code, params: params, module: module, preloads: preloads)
+      Code.eval_string(dynamic_code,
+        params: params,
+        module: module,
+        preloads: preloads,
+        additional_order_statements: additional_order_statements
+      )
 
     result
   end
@@ -267,6 +292,9 @@ defmodule BluePotion do
     File.read("#{path}/#{filename}")
   end
 
+  @doc """
+  BluePotion.read_file("organization.json")
+  """
   def write_json(bin, filename) do
     check = File.exists?(File.cwd!() <> "/media")
 
