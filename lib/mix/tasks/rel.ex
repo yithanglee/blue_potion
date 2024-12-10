@@ -45,8 +45,8 @@ defmodule Mix.Tasks.Rel do
         )
     end
 
-    result = Porcelain.shell("mix distillery.init ")
-    IO.puts(result.out)
+    # result = Porcelain.shell("mix distillery.init ")
+    # IO.puts(result.out)
 
     rel_folder = File.cwd!() <> "/rel/commands"
     res = File.exists?(rel_folder)
@@ -104,11 +104,13 @@ defmodule Mix.Tasks.Rel do
       IO.puts(result_secret.out)
       oo = result_secret.out |> String.trim()
 
+      sample =
+        "DATABASE_URL=ecto://postgres:postgres@#{server.db_url}/#{project.sname}_prod"
+        |> IO.inspect()
+
       result =
         Porcelain.shell(
-          "DATABASE_URL=ecto://postgres:postgres@#{server.db_url}/#{project.alias_name}_prod SECRET_KEY_BASE=#{
-            oo
-          } MIX_ENV=prod mix distillery.release"
+          "DATABASE_URL=ecto://postgres:postgres@#{server.db_url}/#{project.sname}_prod SECRET_KEY_BASE=#{oo} MIX_ENV=prod mix distillery.release"
         )
 
       IO.puts(result.out)
@@ -125,11 +127,9 @@ defmodule Mix.Tasks.Rel do
           File.write(
             project_sh,
             ~s(#!/bin/sh
-            cd /#{project.alias_name}
+            cd /#{project.sname}
             echo #{server.key} | sudo -S tar xfz #{project.alias_name}.tar.gz
-            sudo mv /#{project.alias_name}/#{project.alias_name}.tar.gz /#{project.alias_name}/releases/#{
-              project.vsn
-            }/
+            sudo mv /#{project.alias_name}/#{project.alias_name}.tar.gz /#{project.alias_name}/releases/#{project.vsn}/
             sudo /#{project.alias_name}/bin/#{project.alias_name} stop
             sudo /#{project.alias_name}/bin/#{project.alias_name} migrate
             sudo /#{project.alias_name}/bin/#{project.alias_name} start
@@ -141,18 +141,14 @@ defmodule Mix.Tasks.Rel do
 
       result =
         Porcelain.shell(
-          "sshpass -p #{server.key} scp #{project_sh} #{server.username}@#{server.url}:/#{
-            project.alias_name
-          }"
+          "sshpass -p #{server.key} scp #{project_sh} #{server.username}@#{server.url}:/#{project.sname}"
         )
 
       IO.puts(result.out)
 
       result =
         Porcelain.shell(
-          "sshpass -p #{server.key} scp #{File.cwd!()}/_build/prod/rel/#{project.alias_name}/releases/#{
-            project.vsn
-          }/#{project.alias_name}.tar.gz #{server.username}@#{server.url}:/#{project.alias_name}"
+          "sshpass -p #{server.key} scp #{File.cwd!()}/_build/prod/rel/#{project.alias_name}/releases/#{project.vsn}/#{project.alias_name}.tar.gz #{server.username}@#{server.url}:/#{project.sname}"
         )
 
       IO.puts(result.out)
