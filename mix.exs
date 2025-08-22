@@ -4,15 +4,15 @@ defmodule BluePotion.MixProject do
   def project do
     [
       app: :blue_potion,
-      version: "0.1.7",
+      version: "0.1.8",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
-      description: description,
+      description: description(),
       deps: deps()
     ]
   end
 
-  defp description do
+  defp description() do
     """
     Library to provide additional utility for bootstrap based web app.
     """
@@ -30,7 +30,8 @@ defmodule BluePotion.MixProject do
     [
       {:sshex, "2.2.1"},
       {:porcelain, "~> 2.0"},
-      {:jason, "~> 1.0"}
+      {:jason, "~> 1.0"},
+      {:ecto, ">= 3.4.4 and < 3.4.5"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
