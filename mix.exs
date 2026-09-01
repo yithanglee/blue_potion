@@ -7,7 +7,7 @@ defmodule BluePotion.MixProject do
       version: "0.1.7",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
-      description: description,
+      description: description(),
       deps: deps()
     ]
   end
